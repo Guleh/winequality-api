@@ -14,12 +14,45 @@ def index(fixed_acidity = 0, volatile_acidity = 0, citric_acid = 0,
                residual_sugar = 0, chlorides = 0, free_sulfur_dioxide = 0,
                total_sulfur_dioxide = 0, density = 0, pH = 0, sulphates = 0,
                alcohol = 0):
-    result = get_result(fixed_acidity, volatile_acidity, citric_acid, residual_sugar,
+    result = makemodel('extratrees', fixed_acidity, volatile_acidity, citric_acid, residual_sugar,
            chlorides, free_sulfur_dioxide, total_sulfur_dioxide, density, pH, sulphates,
            alcohol)
+    return result
+
+@app.get("/extratreesregressor/")
+def index(fixed_acidity = 0, volatile_acidity = 0, citric_acid = 0,
+               residual_sugar = 0, chlorides = 0, free_sulfur_dioxide = 0,
+               total_sulfur_dioxide = 0, density = 0, pH = 0, sulphates = 0,
+               alcohol = 0):
+    result = makemodel('extratrees', fixed_acidity, volatile_acidity, citric_acid, residual_sugar,
+           chlorides, free_sulfur_dioxide, total_sulfur_dioxide, density, pH, sulphates,
+           alcohol)
+    return result
+
+@app.get("/randomforestclassifier/")
+def index(fixed_acidity = 0, volatile_acidity = 0, citric_acid = 0,
+               residual_sugar = 0, chlorides = 0, free_sulfur_dioxide = 0,
+               total_sulfur_dioxide = 0, density = 0, pH = 0, sulphates = 0,
+               alcohol = 0):
+    result = makemodel('randomforest', fixed_acidity, volatile_acidity, citric_acid, residual_sugar,
+           chlorides, free_sulfur_dioxide, total_sulfur_dioxide, density, pH, sulphates,
+           alcohol)
+    return result
+
+def makemodel(model, fixed_acidity = 0, volatile_acidity = 0, citric_acid = 0,
+               residual_sugar = 0, chlorides = 0, free_sulfur_dioxide = 0,
+               total_sulfur_dioxide = 0, density = 0, pH = 0, sulphates = 0,
+               alcohol = 0):
+    result = get_result(model, fixed_acidity, volatile_acidity, citric_acid, residual_sugar,
+           chlorides, free_sulfur_dioxide, total_sulfur_dioxide, density, pH, sulphates,
+           alcohol)
+    if model == 'extratrees':
+        model = 'Extra Trees regressor'
+    if model == 'randomforest':
+        model = 'Random Forest classifier'
     data = {'predicted_quality' : result[0],
             'model accuracy' : result[1],
-            'model_used' : 'extra trees regressor',
+            'model_used' : model,
             'fixed_acidity' : fixed_acidity,
             'volatile_acidity' : volatile_acidity,
             'citric_acid' : citric_acid,
@@ -64,7 +97,7 @@ def preprocess(dataset):
     return dataset
 
 
-def get_result(fixed_acidity, volatile_acidity, citric_acid,
+def get_result(model, fixed_acidity, volatile_acidity, citric_acid,
                residual_sugar, chlorides, free_sulfur_dioxide,
                total_sulfur_dioxide, density, pH, sulphates,
                alcohol):
@@ -76,7 +109,10 @@ def get_result(fixed_acidity, volatile_acidity, citric_acid,
     sc_x = RobustScaler(quantile_range=(25.0, 75.0))
     x_train = sc_x.fit_transform(x_train)
     x_test = sc_x.transform(x_test)
-    model = ExtraTreesRegressor(random_state = 1)
+    if model == 'extratrees':
+        model = ExtraTreesRegressor(random_state = 1)
+    if model == 'randomforest':
+        model = RandomForestClassifier(random_state = 1)
     model.fit(x_train, y_train)
     y_pred = np.round(model.predict(x_test))
     accuracy = round(accuracy_score(y_pred, y_test), 4)
