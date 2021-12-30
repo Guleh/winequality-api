@@ -29,7 +29,7 @@ def index(fixed_acidity = 0, volatile_acidity = 0, citric_acid = 0,
            alcohol)
     return result
 
-@app.get("/randomforestclassifier/")
+@app.get("/randomforestregressor/")
 def index(fixed_acidity = 0, volatile_acidity = 0, citric_acid = 0,
                residual_sugar = 0, chlorides = 0, free_sulfur_dioxide = 0,
                total_sulfur_dioxide = 0, density = 0, pH = 0, sulphates = 0,
@@ -49,7 +49,7 @@ def makemodel(model, fixed_acidity = 0, volatile_acidity = 0, citric_acid = 0,
     if model == 'extratrees':
         model = 'Extra Trees regressor'
     if model == 'randomforest':
-        model = 'Random Forest classifier'
+        model = 'Random Forest regressor'
     data = {'predicted_quality' : result[0],
             'model accuracy' : result[1],
             'model_used' : model,
@@ -112,7 +112,7 @@ def get_result(model, fixed_acidity, volatile_acidity, citric_acid,
     if model == 'extratrees':
         model = ExtraTreesRegressor(random_state = 1)
     if model == 'randomforest':
-        model = RandomForestClassifier(random_state = 1)
+        model = RandomForestRegressor(max_features = 'sqrt', n_estimators = 3000, random_state = 1)
     model.fit(x_train, y_train)
     y_pred = np.round(model.predict(x_test))
     accuracy = round(accuracy_score(y_pred, y_test), 4)
